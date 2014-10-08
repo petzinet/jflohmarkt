@@ -1,0 +1,4 @@
+bin/**
+!.empty
+jflohmarkt.jar
+jflohmarkt-*.zip

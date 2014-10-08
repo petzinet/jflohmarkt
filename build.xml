@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="jflohmarkt" default="dist">
+
+    <property name="version" value="snapshot"/>
+	
+	<target name="clean">
+		<delete dir="${basedir}/bin"/>
+		<mkdir dir="${basedir}/bin"/>
+		<delete dir="${basedir}">
+			<include name="jflohmarkt.jar"/>
+			<include name="jflohmarkt-*.zip"/>
+		</delete>
+	</target>
+	
+	<target name="build" depends="clean">
+		<javac destdir="${basedir}/bin" debug="on">
+			<src path="${basedir}/src"/>
+			<classpath>
+				<fileset dir="${basedir}/lib">
+					<include name="*.jar"/>
+				</fileset>
+				<fileset dir="${basedir}/lib-jameica">
+					<include name="*.jar"/>
+				</fileset>
+			</classpath>
+		</javac>
+		<copy todir="${basedir}/bin">
+			<fileset dir="${basedir}/src">
+				<exclude name="**/*.java"/>
+			</fileset>
+			<fileset dir="${basedir}/resource">
+				<include name="**/*"/>
+			</fileset>
+		</copy>
+	</target>
+	
+	<target name="dist" depends="build">
+		<jar destfile="${basedir}/jflohmarkt.jar">
+			<fileset dir="${basedir}/bin"/>
+		</jar>
+		<zip destfile="${basedir}/jflohmarkt-${version}.zip">
+			<zipfileset dir="${basedir}" prefix="jflohmarkt">
+				<include name="jflohmarkt.jar"/>
+				<include name="lib/*.jar"/>
+				<exclude name="lib/h2-*.jar"/>
+				<include name="plugin.xml"/>
+			</zipfileset>
+		</zip>
+	</target>
+	
+</project>

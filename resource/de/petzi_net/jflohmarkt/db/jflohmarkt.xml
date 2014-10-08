@@ -1,0 +1,157 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.2.xsd">
+	
+	<changeSet id="1" author="axel">
+		<createTable tableName="event">
+			<column name="id" type="BIGINT(19)" autoIncrement="true">
+				<constraints primaryKey="true"/>
+			</column>
+			<column name="name" type="VARCHAR(40)">
+				<constraints nullable="false"/>
+			</column>
+			<column name="start" type="date">
+				<constraints nullable="false"/>
+			</column>
+			<column name="end" type="date">
+				<constraints nullable="false"/>
+			</column>
+			<column name="description" type="VARCHAR(255)"/>
+		</createTable>
+		<createTable tableName="seller">
+			<column name="id" type="BIGINT(19)" autoIncrement="true">
+				<constraints primaryKey="true"/>
+			</column>
+			<column name="event" type="BIGINT(19)">
+				<constraints nullable="false" referencedTableName="event" referencedColumnNames="id" foreignKeyName="fk_seller_event"/>
+			</column>
+			<column name="number" type="INT(10)">
+				<constraints nullable="false"/>
+			</column>
+			<column name="name" type="VARCHAR(40)">
+				<constraints nullable="false"/>
+			</column>
+			<column name="givenname" type="VARCHAR(40)">
+				<constraints nullable="false"/>
+			</column>
+			<column name="addressappendix" type="VARCHAR(40)"/>
+			<column name="street" type="VARCHAR(40)">
+				<constraints nullable="false"/>
+			</column>
+			<column name="zipcode" type="VARCHAR(10)">
+				<constraints nullable="false"/>
+			</column>
+			<column name="city" type="VARCHAR(40)">
+				<constraints nullable="false"/>
+			</column>
+			<column name="phone" type="VARCHAR(20)"/>
+			<column name="email" type="VARCHAR(50)">
+				<constraints nullable="false"/>
+			</column>
+			<column name="accountholder" type="VARCHAR(80)"/>
+			<column name="bic" type="VARCHAR(11)"/>
+			<column name="iban" type="VARCHAR(34)"/>
+			<column name="registration" type="DATETIME"/>
+		</createTable>
+		<createIndex tableName="seller" indexName="UK_seller_event_number" unique="true">
+			<column name="event"/>
+			<column name="number"/>
+		</createIndex>
+		<createTable tableName="cashier">
+			<column name="id" type="BIGINT(19)" autoIncrement="true">
+				<constraints primaryKey="true"/>
+			</column>
+			<column name="event" type="BIGINT(19)">
+				<constraints nullable="false" referencedTableName="event" referencedColumnNames="id" foreignKeyName="fk_cashier_event"/>
+			</column>
+			<column name="number" type="INT(10)">
+				<constraints nullable="false"/>
+			</column>
+			<column name="name" type="VARCHAR(40)">
+				<constraints nullable="false"/>
+			</column>
+			<column name="givenname" type="VARCHAR(40)">
+				<constraints nullable="false"/>
+			</column>
+		</createTable>
+		<createIndex tableName="cashier" indexName="UK_cashier_event_number" unique="true">
+			<column name="event"/>
+			<column name="number"/>
+		</createIndex>
+		<createTable tableName="pos">
+			<column name="id" type="BIGINT(19)" autoIncrement="true">
+				<constraints primaryKey="true"/>
+			</column>
+			<column name="event" type="BIGINT(19)">
+				<constraints nullable="false" referencedTableName="event" referencedColumnNames="id" foreignKeyName="fk_pos_event"/>
+			</column>
+			<column name="number" type="INT(10)">
+				<constraints nullable="false"/>
+			</column>
+			<column name="description" type="VARCHAR(255)"/>
+		</createTable>
+		<createIndex tableName="pos" indexName="UK_pos_event_number" unique="true">
+			<column name="event"/>
+			<column name="number"/>
+		</createIndex>
+		<createTable tableName="receipt">
+			<column name="id" type="BIGINT(19)" autoIncrement="true">
+				<constraints primaryKey="true"/>
+			</column>
+			<column name="pos" type="BIGINT(19)">
+				<constraints nullable="false" referencedTableName="pos" referencedColumnNames="id" foreignKeyName="fk_receipt_pos"/>
+			</column>
+			<column name="number" type="INT(10)">
+				<constraints nullable="false"/>
+			</column>
+			<column name="type" type="INT(10)">
+				<constraints nullable="false"/>
+			</column>
+			<column name="cashier" type="BIGINT(19)">
+				<constraints nullable="false" referencedTableName="cashier" referencedColumnNames="id" foreignKeyName="fk_receipt_cashier"/>
+			</column>
+			<column name="state" type="INT(10)">
+				<constraints nullable="false"/>
+			</column>
+			<column name="timestamp" type="DATETIME">
+				<constraints nullable="false"/>
+			</column>
+		</createTable>
+		<createIndex tableName="receipt" indexName="UK_receipt_pos_number" unique="true">
+			<column name="pos"/>
+			<column name="number"/>
+		</createIndex>
+		<createTable tableName="receiptline">
+			<column name="id" type="BIGINT(19)" autoIncrement="true">
+				<constraints primaryKey="true"/>
+			</column>
+			<column name="receipt" type="BIGINT(19)">
+				<constraints nullable="false" referencedTableName="receipt" referencedColumnNames="id" foreignKeyName="fk_receiptline_receipt"/>
+			</column>
+			<column name="line" type="INT(10)">
+				<constraints nullable="false"/>
+			</column>
+			<column name="seller" type="BIGINT(19)">
+				<constraints nullable="true" referencedTableName="seller" referencedColumnNames="id" foreignKeyName="fk_receiptline_seller"/>
+			</column>
+			<column name="quantity" type="INT(10)">
+				<constraints nullable="true"/>
+			</column>
+			<column name="value" type="DECIMAL(6,2)">
+				<constraints nullable="false"/>
+			</column>
+			<column name="valid" type="BOOLEAN">
+				<constraints nullable="false"/>
+			</column>
+			<column name="timestamp" type="DATETIME">
+				<constraints nullable="false"/>
+			</column>
+		</createTable>
+		<createIndex tableName="receiptline" indexName="UK_receiptline_receipt_line" unique="true">
+			<column name="receipt"/>
+			<column name="line"/>
+		</createIndex>
+	</changeSet>
+	
+</databaseChangeLog>
