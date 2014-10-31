@@ -77,7 +77,7 @@ public class JFlohmarktDBServiceImpl extends DBServiceImpl implements JFlohmarkt
 
 	@Override
 	public void checkConsistency() throws RemoteException, ApplicationException {
-		this.driver.checkConsistency(getConnection());
+		update();
 	}
 
 	@Override

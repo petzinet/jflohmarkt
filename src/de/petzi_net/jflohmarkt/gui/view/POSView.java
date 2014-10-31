@@ -57,6 +57,22 @@ public class POSView extends AbstractView {
 			}
 			
 		});
+		buttons.addButton("Journal", new Action() {
+			
+			@Override
+			public void handleAction(Object context) throws ApplicationException {
+				control.printJournal();
+			}
+			
+		});
+		buttons.addButton("Abrechnung", new Action() {
+			
+			@Override
+			public void handleAction(Object context) throws ApplicationException {
+				control.printReport();
+			}
+			
+		});
 		buttons.addButton("Belege importieren...", new Action() {
 			
 			@Override

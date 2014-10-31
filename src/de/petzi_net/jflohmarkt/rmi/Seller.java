@@ -3,6 +3,7 @@
  */
 package de.petzi_net.jflohmarkt.rmi;
 
+import java.math.BigDecimal;
 import java.rmi.RemoteException;
 import java.util.Date;
 
@@ -69,5 +70,9 @@ public interface Seller extends DBObject {
 	public Date getRegistration() throws RemoteException;
 	
 	public void setRegistration(Date registration) throws RemoteException;
+	
+	public BigDecimal getCommissionRate() throws RemoteException;
+	
+	public void setCommissionRate(BigDecimal commissionRate) throws RemoteException;
 
 }

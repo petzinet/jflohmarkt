@@ -22,9 +22,16 @@ public class ReceiptView extends AbstractView {
 		
 		final POSControl control = new POSControl(this);
 		
+		Container container = new SimpleContainer(getParent());
+		if (control.getEvent() != null) {
+			LabelInput input = new LabelInput(control.getEvent().getName());
+			input.setName("Veranstaltung");
+			container.addInput(input);
+		}
 		if (control.getPOS() != null) {
-			Container container = new SimpleContainer(getParent());
-			container.addInput(new LabelInput("Kasse " + control.getPOS().getNumber()));
+			LabelInput input = new LabelInput(String.valueOf(control.getPOS().getNumber()));
+			input.setName("Kasse");
+			container.addInput(input);
 		}
 		
 		control.getReceiptTable().paint(getParent());

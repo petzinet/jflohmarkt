@@ -22,17 +22,51 @@ public class PDFParagraph extends PDFSection {
 	
 	final static int DEFAULT_FONT_SIZE = 10;
 	
+	private final boolean keepTogether;
 	private final String text;
+	private final PDFAlignment alignment;
 	
 	public PDFParagraph(String text) {
+		this(text, PDFAlignment.BLOCK);
+	}
+	
+	public PDFParagraph(String text, PDFAlignment alignment) {
+		this(false, text, alignment);
+	}
+	
+	public PDFParagraph(boolean keepTogether, String text, PDFAlignment alignment) {
+		this.keepTogether = keepTogether;
 		this.text = text;
+		this.alignment = alignment;
+	}
+	
+	void build(Paragraph paragraph, int fontSize) throws DocumentException {
+		switch (alignment == null ? PDFAlignment.BLOCK : alignment) {
+		case LEFT:
+			paragraph.setAlignment(Paragraph.ALIGN_LEFT);
+			break;
+		case RIGHT:
+			paragraph.setAlignment(Paragraph.ALIGN_RIGHT);
+			break;
+		case CENTER:
+			paragraph.setAlignment(Paragraph.ALIGN_CENTER);
+			break;
+		case BLOCK:
+			paragraph.setAlignment(Paragraph.ALIGN_JUSTIFIED);
+			break;
+		}
+		paragraph.setLeading(0, 1.25f);
+		makePhrase(paragraph, text, null, fontSize);
+		paragraph.setSpacingBefore(paragraph.getFont().getCalculatedLeading(0.25f));
+		paragraph.setSpacingAfter(paragraph.getFont().getCalculatedLeading(0.25f));
+		paragraph.setKeepTogether(keepTogether);
 	}
 	
 	@Override
 	void build(Document document, int fontSize) throws DocumentException {
 		Paragraph paragraph = new Paragraph();
-		paragraph.setAlignment(Paragraph.ALIGN_JUSTIFIED);
-		document.add(makePhrase(paragraph, text, null, fontSize));
+		build(paragraph, fontSize);
+		document.add(paragraph);
 	}
 	
 	static Phrase makePhrase(Phrase phrase, String text, FontStyle fontStyle, int defaultFontSize) {

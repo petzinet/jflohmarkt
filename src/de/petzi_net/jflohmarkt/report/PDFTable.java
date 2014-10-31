@@ -29,10 +29,16 @@ import de.willuhn.logging.Logger;
  */
 public class PDFTable extends PDFSection {
 	
+	private final boolean keepTogether;
 	private final Iterable<?> iterable;
 	private final List<Column> columns = new ArrayList<Column>();
 	
-	public PDFTable(final GenericIterator list) {
+	public PDFTable(GenericIterator list) {
+		this(false, list);
+	}
+	
+	public PDFTable(boolean keepTogether, final GenericIterator list) {
+		this.keepTogether = keepTogether;
 		this.iterable = new Iterable<GenericObject>() {
 
 			@Override
@@ -77,16 +83,36 @@ public class PDFTable extends PDFSection {
 	}
 	
 	public PDFTable(Iterable<?> iterable) {
+		this(false, iterable);
+	}
+	
+	public PDFTable(boolean keepTogether, Iterable<?> iterable) {
+		this.keepTogether = keepTogether;
 		this.iterable = iterable;
 	}
 	
 	public PDFTable addColumn(String title, String field, int ratio) {
-		columns.add(new Column(title, field, ratio, null));
+		columns.add(new Column(title, field, ratio, null, PDFAlignment.LEFT, null));
 		return this;
 	}
 	
 	public PDFTable addColumn(String title, String field, int ratio, Formatter formatter) {
-		columns.add(new Column(title, field, ratio, formatter));
+		columns.add(new Column(title, field, ratio, formatter, PDFAlignment.LEFT, null));
+		return this;
+	}
+	
+	public PDFTable addColumn(String title, String field, int ratio, PDFAlignment alignment) {
+		columns.add(new Column(title, field, ratio, null, alignment, null));
+		return this;
+	}
+	
+	public PDFTable addColumn(String title, String field, int ratio, PDFAlignment alignment, Formatter formatter) {
+		columns.add(new Column(title, field, ratio, formatter, alignment, null));
+		return this;
+	}
+	
+	public PDFTable addColumn(String title, String field, int ratio, PDFAlignment alignment, Formatter formatter, Object footerValue) {
+		columns.add(new Column(title, field, ratio, formatter, alignment, footerValue));
 		return this;
 	}
 	
@@ -98,8 +124,11 @@ public class PDFTable extends PDFSection {
 		for (int n = 0; n < widths.length; n++)
 			widths[n] = columns.get(n).ratio;
 		table.setWidths(widths);
+		boolean hasFooterRow = false;
 		for (int n = 0; n < widths.length; n++) {
-			table.addCell(createCell(columns.get(n).title, true, n == 0 ? -1 : n + 1 < columns.size() ? 0 : 1, false, fontSize));
+			Column column = columns.get(n);
+			table.addCell(createCell(column.title, true, n == 0 ? -1 : n + 1 < columns.size() ? 0 : 1, true, fontSize, column.alignment));
+			hasFooterRow |= column.footerValue != null;
 		}
 		table.setHeaderRows(1);
 		long counter = 0;
@@ -114,21 +143,36 @@ public class PDFTable extends PDFSection {
 					Logger.error("cannot analyse data", e);
 					throw new DocumentException(e);
 				}
+				if (column.footerValue instanceof PDFAggregation)
+					((PDFAggregation) column.footerValue).addValue(value);
 				String text;
 				if (column.formatter == null)
 					text = value == null ? "" : value.toString();
 				else
 					text = column.formatter.format(value);
-				table.addCell(createCell(text, false, n == 0 ? -1 : n + 1 < columns.size() ? 0 : 1, counter % 3 == 0, fontSize));
+				table.addCell(createCell(text, false, n == 0 ? -1 : n + 1 < columns.size() ? 0 : 1, counter % 3 == 0, fontSize, column.alignment));
 			}
 		}
-		for (PdfPCell cell : table.getRow(table.getRows().size() - 1).getCells()) {
-			cell.enableBorderSide(PdfPCell.BOTTOM);
+		if (hasFooterRow) {
+			for (int n = 0; n < widths.length; n++) {
+				Column column = columns.get(n);
+				String text;
+				if (column.footerValue == null)
+					text = "";
+				else
+					text = column.footerValue.toString();
+				table.addCell(createCell(text, true, n == 0 ? -1 : n + 1 < columns.size() ? 0 : 1, false, fontSize, column.alignment));
+			}
+		} else {
+			for (PdfPCell cell : table.getRow(table.getRows().size() - 1).getCells()) {
+				cell.enableBorderSide(PdfPCell.BOTTOM);
+			}
 		}
+		table.setKeepTogether(keepTogether);
 		document.add(table);
 	}
 	
-	private PdfPCell createCell(String text, boolean header, int position, boolean highlighted, int fontSize) {
+	private PdfPCell createCell(String text, boolean header, int position, boolean highlighted, int fontSize, PDFAlignment alignment) {
 		Font font;
 		if (header) {
 			font = new Font(Font.HELVETICA, fontSize, Font.BOLD, Color.BLACK);
@@ -136,7 +180,7 @@ public class PDFTable extends PDFSection {
 			font = new Font(Font.HELVETICA, fontSize, Font.NORMAL, Color.BLACK);
 		}
 		PdfPCell cell = new PdfPCell(new Phrase(text, font));
-		if (header || highlighted) {
+		if (highlighted) {
 			cell.setBackgroundColor(HIGHLIGHTED);
 		} else {
 			cell.setBackgroundColor(Color.WHITE);
@@ -155,6 +199,21 @@ public class PDFTable extends PDFSection {
 		if (!header) {
 			cell.disableBorderSide(PdfPCell.TOP | PdfPCell.BOTTOM);
 		}
+		
+		switch (alignment == null ? PDFAlignment.LEFT : alignment) {
+		case LEFT:
+			cell.setHorizontalAlignment(PdfPCell.ALIGN_LEFT);
+			break;
+		case RIGHT:
+			cell.setHorizontalAlignment(PdfPCell.ALIGN_RIGHT);
+			break;
+		case CENTER:
+			cell.setHorizontalAlignment(PdfPCell.ALIGN_CENTER);
+			break;
+		case BLOCK:
+			cell.setHorizontalAlignment(PdfPCell.ALIGN_JUSTIFIED);
+			break;
+		}
 		return cell;
 	}
 	
@@ -166,12 +225,16 @@ public class PDFTable extends PDFSection {
 		public final String field;
 		public final int ratio;
 		public final Formatter formatter;
+		public final PDFAlignment alignment;
+		public final Object footerValue;
 		
-		public Column(String title, String field, int ratio, Formatter formatter) {
+		public Column(String title, String field, int ratio, Formatter formatter, PDFAlignment alignment, Object footerValue) {
 			this.title = title;
 			this.field = field;
 			this.ratio = ratio;
 			this.formatter = formatter;
+			this.alignment = alignment;
+			this.footerValue = footerValue;
 		}
 		
 	}

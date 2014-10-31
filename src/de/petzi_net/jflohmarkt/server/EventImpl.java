@@ -3,6 +3,7 @@
  */
 package de.petzi_net.jflohmarkt.server;
 
+import java.math.BigDecimal;
 import java.rmi.RemoteException;
 import java.util.Date;
 
@@ -69,6 +70,17 @@ public class EventImpl extends AbstractDBObject implements Event {
 	@Override
 	public void setDescription(String description) throws RemoteException {
 		setAttribute("description", description);
+	}
+
+	@Override
+	public BigDecimal getCommissionRate() throws RemoteException {
+		BigDecimal value = (BigDecimal) getAttribute("commissionrate");
+		return value == null ? BigDecimal.ZERO : value;
+	}
+
+	@Override
+	public void setCommissionRate(BigDecimal commissionRate) throws RemoteException {
+		setAttribute("commissionrate", commissionRate);
 	}
 
 }

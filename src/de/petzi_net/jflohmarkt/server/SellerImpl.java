@@ -3,6 +3,7 @@
  */
 package de.petzi_net.jflohmarkt.server;
 
+import java.math.BigDecimal;
 import java.rmi.RemoteException;
 import java.util.Date;
 
@@ -171,6 +172,16 @@ public class SellerImpl extends AbstractDBObject implements Seller {
 	@Override
 	public void setRegistration(Date registration) throws RemoteException {
 		setAttribute("registration", registration);
+	}
+
+	@Override
+	public BigDecimal getCommissionRate() throws RemoteException {
+		return (BigDecimal) getAttribute("commissionrate");
+	}
+
+	@Override
+	public void setCommissionRate(BigDecimal commissionRate) throws RemoteException {
+		setAttribute("commissionrate", commissionRate);
 	}
 
 }

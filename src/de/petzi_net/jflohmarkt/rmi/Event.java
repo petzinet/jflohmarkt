@@ -3,6 +3,7 @@
  */
 package de.petzi_net.jflohmarkt.rmi;
 
+import java.math.BigDecimal;
 import java.rmi.RemoteException;
 import java.util.Date;
 
@@ -29,5 +30,9 @@ public interface Event extends DBObject {
 	public String getDescription() throws RemoteException;
 
 	public void setDescription(String description) throws RemoteException;
+
+	public BigDecimal getCommissionRate() throws RemoteException;
+
+	public void setCommissionRate(BigDecimal commissionRate) throws RemoteException;
 
 }

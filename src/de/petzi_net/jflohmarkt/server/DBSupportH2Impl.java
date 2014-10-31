@@ -3,21 +3,19 @@
  */
 package de.petzi_net.jflohmarkt.server;
 
-import java.io.File;
 import java.lang.reflect.Method;
-import java.rmi.RemoteException;
 import java.sql.Connection;
 
 import de.petzi_net.jflohmarkt.JFlohmarktPlugin;
+import de.petzi_net.jflohmarkt.rmi.DBSupport;
 import de.willuhn.jameica.system.Application;
 import de.willuhn.logging.Logger;
-import de.willuhn.util.ApplicationException;
 
 /**
  * @author axel
  *
  */
-public class DBSupportH2Impl extends AbstractDBSupportImpl {
+public class DBSupportH2Impl implements DBSupport {
 
 	private static final long serialVersionUID = 1L;
 
@@ -51,22 +49,6 @@ public class DBSupportH2Impl extends AbstractDBSupportImpl {
 	@Override
 	public String getJdbcUsername() {
 		return "jflohmarkt";
-	}
-
-	@Override
-	public void checkConsistency(Connection conn) throws ApplicationException {
-	}
-
-	@Override
-	public void execute(Connection conn, File sqlScript) throws RemoteException {
-		if (sqlScript == null)
-			return;
-		sqlScript = new File(sqlScript.getParent(), sqlScript.getName());
-		if (!sqlScript.exists()) {
-			Logger.debug("file " + sqlScript + " does not exist, skipping");
-			return;
-		}
-		super.execute(conn, sqlScript);
 	}
 
 	@Override

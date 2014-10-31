@@ -8,6 +8,7 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.rmi.RemoteException;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.FileDialog;
@@ -19,6 +20,9 @@ import com.lowagie.text.PageSize;
 import com.lowagie.text.pdf.PdfWriter;
 
 import de.willuhn.jameica.gui.GUI;
+import de.willuhn.jameica.gui.internal.action.Program;
+import de.willuhn.jameica.messaging.StatusBarMessage;
+import de.willuhn.jameica.system.Application;
 import de.willuhn.util.ApplicationException;
 
 /**
@@ -27,7 +31,7 @@ import de.willuhn.util.ApplicationException;
  */
 public class PDFReport {
 	
-	public static boolean produceReportFile(String title, String subTitle, int fontSize, boolean landscape, Producer producer) throws ApplicationException {
+	public static boolean produceReport(String title, String subTitle, int fontSize, boolean landscape, Producer producer) throws ApplicationException, RemoteException {
 		File file = askReportFile();
 		if (file == null)
 			return false;
@@ -46,27 +50,49 @@ public class PDFReport {
 		} catch (FileNotFoundException e) {
 			throw new ApplicationException(e);
 		}
+		showFile(file);
 		return true;
 	}
 	
 	public static interface Producer {
 		
-		public void produce(PDFReport report) throws ApplicationException;
+		public void produce(PDFReport report) throws ApplicationException, RemoteException;
 		
 	}
 	
-	public static File askReportFile() {
+	public static File askReportFile() throws ApplicationException {
 		FileDialog fd = new FileDialog(GUI.getShell(), SWT.SAVE);
 		fd.setText("Ausgabedatei wählen...");
 		fd.setFilterExtensions(new String[] { "*.pdf" });
 		String filePath = fd.open();
 		if (filePath == null || filePath.length() == 0) {
-			return null;
+			try {
+				File tempFile = File.createTempFile("jflohmarkt-", ".pdf");
+				tempFile.deleteOnExit();
+				return tempFile;
+			} catch (IOException e) {
+				throw new ApplicationException(e);
+			}
 		}
 		if (!filePath.toLowerCase().endsWith(".pdf")) {
 			filePath = filePath + ".pdf";
 		}
 		return new File(filePath);
+	}
+	
+	public static void showFile(final File file) {
+		GUI.getDisplay().asyncExec(new Runnable(){
+			
+			@Override
+			public void run() {
+				try {
+					new Program().handleAction(file);
+				} catch (ApplicationException e) {
+					Application.getMessagingFactory().sendMessage(new StatusBarMessage(e.getLocalizedMessage(), StatusBarMessage.TYPE_ERROR));
+				}
+			}
+			
+		});
 	}
 	
 	private final OutputStream outputStream;

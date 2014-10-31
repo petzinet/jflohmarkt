@@ -65,6 +65,14 @@ public class SellerView extends AbstractView {
 			}
 			
 		});
+		buttons.addButton("Abrechnungen", new Action() {
+			
+			@Override
+			public void handleAction(Object context) throws ApplicationException {
+				control.printClearings();
+			}
+			
+		});
 		buttons.addButton("Verkäufer importieren...", new Action() {
 			
 			@Override

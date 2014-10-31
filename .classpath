@@ -6,7 +6,7 @@
 	<classpathentry kind="lib" path="lib/liquibase-3.2.0.jar"/>
 	<classpathentry kind="lib" path="lib/commons-codec-1.9.jar"/>
 	<classpathentry kind="lib" path="lib/itext-2.1.7.jar"/>
-	<classpathentry kind="lib" path="lib/jflohmarktpos-0.1.0.jar"/>
+	<classpathentry kind="lib" path="lib/jflohmarktpos-0.1.1.jar"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/jameica_2.6.1"/>
 	<classpathentry kind="lib" path="/jameica_2.6.1/lib/h2/h2.jar"/>
 	<classpathentry kind="output" path="bin"/>

@@ -66,7 +66,7 @@ public class CashierControl extends AbstractControl {
 		return cashierTable;
 	}
 	
-	private Event getEvent() throws RemoteException {
+	public Event getEvent() throws RemoteException {
 		if (event == null) {
 			String currentEventId = JFlohmarktPlugin.getSettings().getString("event.current", "");
 			if (!currentEventId.isEmpty()) {
@@ -183,19 +183,15 @@ public class CashierControl extends AbstractControl {
 	
 	public void printList() throws ApplicationException {
 		try {
-			PDFReport.produceReportFile("Kassierer", getEvent().getName(), 10, false, new PDFReport.Producer() {
+			PDFReport.produceReport("Kassierer", getEvent().getName(), 10, false, new PDFReport.Producer() {
 				
 				@Override
-				public void produce(PDFReport report) throws ApplicationException {
-					try {
-						PDFTable cashierTable = new PDFTable(getCashierTable().getItems());
-						cashierTable.addColumn("Nummer", "number", 5);
-						cashierTable.addColumn("Name", "name", 10);
-						cashierTable.addColumn("Vorname", "givenname", 10);
-						report.add(cashierTable);
-					} catch (RemoteException e) {
-						throw new ApplicationException(e);
-					}
+				public void produce(PDFReport report) throws ApplicationException, RemoteException {
+					PDFTable cashierTable = new PDFTable(getCashierTable().getItems());
+					cashierTable.addColumn("Nummer", "number", 5);
+					cashierTable.addColumn("Name", "name", 10);
+					cashierTable.addColumn("Vorname", "givenname", 10);
+					report.add(cashierTable);
 				}
 			});
 		} catch (RemoteException e) {

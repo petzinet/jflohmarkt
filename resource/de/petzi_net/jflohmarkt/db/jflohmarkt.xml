@@ -154,4 +154,15 @@
 		</createIndex>
 	</changeSet>
 	
+	<changeSet id="2" author="axel">
+		<addColumn tableName="event">
+			<column name="commissionrate" type="DECIMAL(6,2)" defaultValue="0">
+				<constraints nullable="false"/>
+			</column>
+		</addColumn>
+		<addColumn tableName="seller">
+			<column name="commissionrate" type="DECIMAL(6,2)"/>
+		</addColumn>
+	</changeSet>
+	
 </databaseChangeLog>

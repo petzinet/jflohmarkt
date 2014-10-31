@@ -29,9 +29,18 @@ public class EventDetailView extends AbstractView {
 		container.addInput(control.getName());
 		container.addInput(control.getStart());
 		container.addInput(control.getEnd());
+		container.addInput(control.getCommissionRate());
 		container.addInput(control.getDescription());
 		
 		ButtonArea buttons = new ButtonArea();
+		buttons.addButton("Abrechnung", new Action() {
+			
+			@Override
+			public void handleAction(Object context) throws ApplicationException {
+				control.printReport();
+			}
+			
+		});
 		buttons.addButton("Löschen", null);
 		buttons.addButton("Speichern", new Action() {
 			
